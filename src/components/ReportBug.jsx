@@ -20,17 +20,13 @@ function ReportBug({ currentUser }) {
   const [actualResult, setActualResult] = useState('');
 
   useEffect(() => {
-    detectEnvironment();
-  }, []);
-
-  const detectEnvironment = () => {
     const os = navigator.platform;
     const browser = getBrowserInfo();
     setFormData(prev => ({
       ...prev,
       environment: `${os} / ${browser.name} / v${browser.version}`
     }));
-  };
+  }, []);
 
   const getBrowserInfo = () => {
     const ua = navigator.userAgent;
