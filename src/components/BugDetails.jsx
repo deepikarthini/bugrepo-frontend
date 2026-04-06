@@ -6,11 +6,14 @@ import './BugDetails.css';
 function BugDetails({ currentUser }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getBugById, users, assignBug, updateBugStatus } = useBugs();
+  const { getBugById, users, assignBug, updateBugStatus, getBugAiInsights, exportBugAiReport } = useBugs();
   const bug = getBugById(id);
   const [selectedUser, setSelectedUser] = useState('');
   const [isReplaying, setIsReplaying] = useState(false);
   const [currentReplayStep, setCurrentReplayStep] = useState(0);
+  const [aiInsights, setAiInsights] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   useEffect(() => {
     if (bug && bug.assignedTo) {
@@ -24,6 +27,28 @@ function BugDetails({ currentUser }) {
       setSelectedUser('');
     }
   }, [bug, users]);
+
+  useEffect(() => {
+    const loadAiInsights = async () => {
+      if (!bug) {
+        return;
+      }
+
+      try {
+        setAiLoading(true);
+        setAiError('');
+        const insights = await getBugAiInsights(id);
+        setAiInsights(insights);
+      } catch (error) {
+        console.error('Error loading AI insights:', error);
+        setAiError('Failed to load AI insights for this bug.');
+      } finally {
+        setAiLoading(false);
+      }
+    };
+
+    loadAiInsights();
+  }, [bug, id, getBugAiInsights]);
 
   const handleAssign = async () => {
     try {
@@ -62,6 +87,37 @@ function BugDetails({ currentUser }) {
         return prev + 1;
       });
     }, 2000);
+  };
+
+  const handleExportAiReport = async () => {
+    try {
+      const reportBlob = await exportBugAiReport(id);
+      const url = window.URL.createObjectURL(new Blob([reportBlob], { type: 'text/markdown' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `bug-${id}-ai-report.md`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting AI report:', error);
+      alert('Failed to export AI report.');
+    }
+  };
+
+  const copyPlaywrightScript = async () => {
+    if (!aiInsights?.playwrightScript) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(aiInsights.playwrightScript);
+      alert('Playwright script copied to clipboard.');
+    } catch (error) {
+      console.error('Error copying script:', error);
+      alert('Failed to copy script.');
+    }
   };
 
   const getStatusClass = (status) => {
@@ -118,6 +174,78 @@ function BugDetails({ currentUser }) {
               {bug.priority}
             </span>
           </div>
+        </div>
+
+        <div className="ai-section">
+          <div className="ai-section-header">
+            <h3>AI Insights</h3>
+            <div className="ai-section-actions">
+              <button className="btn btn-ai-secondary" onClick={() => getBugAiInsights(id).then(setAiInsights).catch(() => setAiError('Failed to refresh AI insights.'))}>
+                Refresh Insights
+              </button>
+              <button className="btn btn-ai-primary" onClick={handleExportAiReport}>
+                Export AI Report
+              </button>
+            </div>
+          </div>
+
+          {aiLoading && <p className="ai-state">Generating AI insights...</p>}
+          {aiError && <p className="ai-error">{aiError}</p>}
+
+          {aiInsights && !aiLoading && (
+            <div className="ai-grid">
+              <div className="ai-card">
+                <h4>Summary</h4>
+                <p>{aiInsights.summary}</p>
+              </div>
+
+              <div className="ai-card">
+                <h4>Suggested Priority</h4>
+                <p className={`priority-badge priority-${aiInsights.suggestedPriority.toLowerCase()}`}>
+                  {aiInsights.suggestedPriority}
+                </p>
+                <ul className="ai-reasoning-list">
+                  {aiInsights.reasoning?.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="ai-card ai-card-wide">
+                <h4>Root Cause Hint</h4>
+                <p>{aiInsights.rootCauseHint}</p>
+              </div>
+
+              <div className="ai-card ai-card-wide">
+                <h4>Possible Duplicates</h4>
+                {aiInsights.duplicateCandidates?.length ? (
+                  <div className="duplicate-list">
+                    {aiInsights.duplicateCandidates.map(candidate => (
+                      <div key={candidate.id} className="duplicate-item">
+                        <div>
+                          <strong>#{candidate.id} {candidate.title}</strong>
+                          <p>{candidate.reason}</p>
+                        </div>
+                        <span className="duplicate-score">{candidate.similarityScore}%</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No close duplicates found for this bug.</p>
+                )}
+              </div>
+
+              <div className="ai-card ai-card-wide">
+                <div className="ai-card-header-row">
+                  <h4>Playwright Script</h4>
+                  <button className="btn btn-ai-secondary" onClick={copyPlaywrightScript}>
+                    Copy Script
+                  </button>
+                </div>
+                <pre className="playwright-script">{aiInsights.playwrightScript}</pre>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="reproduction-section">

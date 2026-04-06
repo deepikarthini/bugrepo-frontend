@@ -61,6 +61,12 @@ export const bugAPI = {
   
   // Get single bug by ID
   getBugById: (id) => api.get(`/bugs/${id}`),
+
+  // Get AI insights for a bug
+  getAiInsights: (id) => api.get(`/bugs/${id}/ai-insights`),
+
+  // Export AI bug report
+  exportAiReport: (id) => api.get(`/bugs/${id}/ai-report`, { responseType: 'blob' }),
   
   // Get bugs assigned to user
   getBugsByUser: (username) => api.get(`/bugs/assigned/${username}`),

@@ -213,6 +213,16 @@ export const BugProvider = ({ children }) => {
     }
   };
 
+  const getBugAiInsights = async (id) => {
+    const response = await bugAPI.getAiInsights(id);
+    return response.data;
+  };
+
+  const exportBugAiReport = async (id) => {
+    const response = await bugAPI.exportAiReport(id);
+    return response.data;
+  };
+
   const value = {
     bugs,
     users,
@@ -227,6 +237,8 @@ export const BugProvider = ({ children }) => {
     updateBugStatus,
     assignBug,
     deleteBug,
+    getBugAiInsights,
+    exportBugAiReport,
     refreshBugs: fetchBugs,
   };
 
