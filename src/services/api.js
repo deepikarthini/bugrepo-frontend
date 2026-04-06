@@ -65,6 +65,9 @@ export const bugAPI = {
   // Get AI insights for a bug
   getAiInsights: (id) => api.get(`/bugs/${id}/ai-insights`),
 
+  // Regenerate AI insights for a bug
+  regenerateAiInsights: (id) => api.post(`/bugs/${id}/ai-insights/regenerate`),
+
   // Export AI bug report
   exportAiReport: (id) => api.get(`/bugs/${id}/ai-report`, { responseType: 'blob' }),
   

@@ -6,7 +6,7 @@ import './BugDetails.css';
 function BugDetails({ currentUser }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getBugById, users, assignBug, updateBugStatus, getBugAiInsights, exportBugAiReport } = useBugs();
+  const { getBugById, users, assignBug, updateBugStatus, getBugAiInsights, regenerateBugAiInsights, exportBugAiReport } = useBugs();
   const bug = getBugById(id);
   const [selectedUser, setSelectedUser] = useState('');
   const [isReplaying, setIsReplaying] = useState(false);
@@ -106,6 +106,20 @@ function BugDetails({ currentUser }) {
     }
   };
 
+  const handleRefreshAiInsights = async () => {
+    try {
+      setAiLoading(true);
+      setAiError('');
+      const insights = await regenerateBugAiInsights(id);
+      setAiInsights(insights);
+    } catch (error) {
+      console.error('Error refreshing AI insights:', error);
+      setAiError('Failed to refresh AI insights.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   const copyPlaywrightScript = async () => {
     if (!aiInsights?.playwrightScript) {
       return;
@@ -180,7 +194,7 @@ function BugDetails({ currentUser }) {
           <div className="ai-section-header">
             <h3>AI Insights</h3>
             <div className="ai-section-actions">
-              <button className="btn btn-ai-secondary" onClick={() => getBugAiInsights(id).then(setAiInsights).catch(() => setAiError('Failed to refresh AI insights.'))}>
+              <button className="btn btn-ai-secondary" onClick={handleRefreshAiInsights}>
                 Refresh Insights
               </button>
               <button className="btn btn-ai-primary" onClick={handleExportAiReport}>
@@ -197,6 +211,9 @@ function BugDetails({ currentUser }) {
               <div className="ai-card">
                 <h4>Summary</h4>
                 <p>{aiInsights.summary}</p>
+                {aiInsights.generatedAt && (
+                  <p className="ai-meta">Generated: {new Date(aiInsights.generatedAt).toLocaleString()}</p>
+                )}
               </div>
 
               <div className="ai-card">

@@ -173,6 +173,12 @@
   color: #c82333;
 }
 
+.ai-meta {
+  margin-top: 0.75rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 .btn-ai-primary,
 .btn-ai-secondary {
   border: none;

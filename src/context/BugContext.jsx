@@ -218,6 +218,11 @@ export const BugProvider = ({ children }) => {
     return response.data;
   };
 
+  const regenerateBugAiInsights = async (id) => {
+    const response = await bugAPI.regenerateAiInsights(id);
+    return response.data;
+  };
+
   const exportBugAiReport = async (id) => {
     const response = await bugAPI.exportAiReport(id);
     return response.data;
@@ -238,6 +243,7 @@ export const BugProvider = ({ children }) => {
     assignBug,
     deleteBug,
     getBugAiInsights,
+    regenerateBugAiInsights,
     exportBugAiReport,
     refreshBugs: fetchBugs,
   };
