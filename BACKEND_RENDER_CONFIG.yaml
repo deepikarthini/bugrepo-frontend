@@ -1,0 +1,14 @@
+# Copy this file to your backend project as "render.yaml"
+# Location: c:\Users\kadeepik\OneDrive - Cisco\Spring\demo\render.yaml
+
+services:
+  - type: web
+    name: bug-reproduction-backend
+    env: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod

@@ -1,0 +1,149 @@
+.my-bugs {
+  padding: 2rem 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-update {
+  background-color: #2c5aa0;
+  color: white;
+}
+
+.btn-update:hover {
+  background-color: #1e3a5f;
+}
+
+.btn-logout {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-logout:hover {
+  background-color: #c82333;
+}
+
+.no-bugs {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.bugs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bugs-table thead {
+  background-color: #2c5aa0;
+  color: white;
+}
+
+.bugs-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  border: none;
+}
+
+.bugs-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.bugs-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.bugs-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.bug-id {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #495057;
+}
+
+.bug-title-link {
+  color: #2c5aa0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.bug-title-link:hover {
+  text-decoration: underline;
+}
+
+.status-select {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.status-select.status-open {
+  background-color: #dc3545;
+  color: white;
+}
+
+.status-select.status-in-progress {
+  background-color: #6f42c1;
+  color: white;
+}
+
+.status-select.status-closed {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-select:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.btn-download {
+  background-color: #2c5aa0;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+}
+
+.btn-download:hover {
+  background-color: #1e3a5f;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .bugs-table {
+    min-width: 600px;
+  }
+}

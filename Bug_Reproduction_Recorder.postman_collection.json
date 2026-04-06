@@ -1,0 +1,283 @@
+{
+	"info": {
+		"name": "Bug Reproduction Recorder",
+		"description": "Complete API collection for Bug Reproduction Recorder application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"user_email\", jsonData.email);",
+									"    console.log(\"Token saved: \" + jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"dev@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with credentials and receive JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"fullName\": \"New User\",\n  \"role\": \"QA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. Roles: QA, DEVELOPER, ADMIN"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bug Reports",
+			"item": [
+				{
+					"name": "Get All Bugs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs"
+							]
+						},
+						"description": "Retrieve all bug reports"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Bug by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs/2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs",
+								"2"
+							]
+						},
+						"description": "Get a specific bug by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Bug",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Dashboard loading issue\",\n  \"description\": \"Dashboard takes too long to load\",\n  \"priority\": \"High\",\n  \"environment\": \"Windows 11 / Chrome / v120.0\",\n  \"reproductionSteps\": [\n    {\n      \"step\": 1,\n      \"description\": \"Login to the application\",\n      \"expected\": \"Login successful\",\n      \"actual\": \"Login successful\"\n    },\n    {\n      \"step\": 2,\n      \"description\": \"Navigate to dashboard\",\n      \"expected\": \"Dashboard loads in under 2 seconds\",\n      \"actual\": \"Takes 10+ seconds to load\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/bugs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs"
+							]
+						},
+						"description": "Create a new bug report"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Reported Bugs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs/my-reports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs",
+								"my-reports"
+							]
+						},
+						"description": "Get all bugs reported by the current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Assigned Bugs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs/my-assigned",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs",
+								"my-assigned"
+							]
+						},
+						"description": "Get all bugs assigned to the current developer"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Bug Status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs/2/status?status=IN_PROGRESS",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs",
+								"2",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "IN_PROGRESS",
+									"description": "Values: NEW, IN_PROGRESS, ASSIGNED, RESOLVED, CLOSED"
+								}
+							]
+						},
+						"description": "Update bug status. Valid values: NEW, IN_PROGRESS, ASSIGNED, RESOLVED, CLOSED"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Bug to Developer",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/bugs/2/assign/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"bugs",
+								"2",
+								"assign",
+								"3"
+							]
+						},
+						"description": "Assign bug to a developer. Format: /bugs/{bugId}/assign/{developerId}"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_email",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
