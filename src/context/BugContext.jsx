@@ -55,11 +55,13 @@ export const BugProvider = ({ children }) => {
       setError(null);
     } catch (err) {
       console.error('Error fetching bugs:', err);
-      if (err.response?.status === 403 || err.response?.status === 401) {
+      if (err.response?.status === 401) {
         setError('Session expired. Please login again.');
-        // Clear invalid tokens
-        localStorage.clear();
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to view these bugs.');
       } else {
         setError('Failed to fetch bugs. Make sure your backend is running.');
       }
@@ -132,10 +134,13 @@ export const BugProvider = ({ children }) => {
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserEmail = currentUser.email;
     const currentUserFullName = currentUser.fullName;
+    const currentUserRole = currentUser.role;
     
     try {
-      // Try to get from backend first
-      const response = await bugAPI.getMyAssignedBugs();
+      // Developers see assigned bugs. QA/Admin users see bugs they reported.
+      const response = currentUserRole === 'DEVELOPER'
+        ? await bugAPI.getMyAssignedBugs()
+        : await bugAPI.getMyReportedBugs();
       const mappedBugs = response.data.map(bug => mapBugToFrontend(bug));
       return mappedBugs;
     } catch (err) {
@@ -193,10 +198,20 @@ export const BugProvider = ({ children }) => {
 
   const assignBug = async (id, assignedTo) => {
     try {
-      const bug = getBugById(id);
-      const updates = { ...bug, assignedTo };
-      const response = await bugAPI.updateBug(id, updates);
-      setBugs(bugs.map(b => b.id === id ? response.data : b));
+      const developer = users.find(user =>
+        user.id === assignedTo ||
+        user.email === assignedTo ||
+        user.fullName === assignedTo
+      );
+
+      if (!developer?.id) {
+        throw new Error('Selected developer was not found');
+      }
+
+      const response = await bugAPI.assignBug(id, developer.id);
+      const mappedBug = mapBugToFrontend(response.data);
+      setBugs(bugs.map(bug => bug.id === id ? mappedBug : bug));
+      return mappedBug;
     } catch (err) {
       console.error('Error assigning bug:', err);
       throw err;

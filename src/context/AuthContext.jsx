@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -12,25 +12,19 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      localStorage.removeItem('user');
+      return null;
+    }
+  });
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  const [loading] = useState(false);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-
-  // Clear session on mount to always start at login page
-  useEffect(() => {
-    const initAuth = async () => {
-      // Clear any existing authentication data
-      localStorage.clear();
-      sessionStorage.clear();
-      setToken(null);
-      setUser(null);
-      setLoading(false);
-    };
-
-    initAuth();
-  }, []);
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 
   const login = async (email, password) => {
     try {
@@ -76,9 +70,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear all localStorage and sessionStorage
-    localStorage.clear();
-    sessionStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('sessionActive');
     setToken(null);
     setUser(null);
     // Force redirect to login

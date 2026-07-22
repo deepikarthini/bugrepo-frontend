@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API Base URL - update this to match your backend URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -24,7 +24,8 @@ api.interceptors.request.use(
   }
 );
 
-// Handle 401 Unauthorized and 403 Forbidden responses (invalid/expired token)
+// A 401 means the token is missing, invalid, or expired. A 403 means the
+// authenticated user lacks permission and must not destroy their session.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -32,12 +33,13 @@ api.interceptors.response.use(
     const currentPath = window.location.pathname;
     
     // Handle authentication errors
-    if ((status === 401 || status === 403) && 
+    if (status === 401 &&
         currentPath !== '/login' && 
         currentPath !== '/register') {
       console.error('Authentication failed. Clearing session and redirecting to login.');
-      // Clear all localStorage
-      localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('sessionActive');
       // Redirect to login
       window.location.replace('/login');
     }
@@ -76,6 +78,9 @@ export const bugAPI = {
   
   // Get bugs assigned to current logged-in user
   getMyAssignedBugs: () => api.get('/bugs/my-assigned'),
+
+  // Get bugs reported by current logged-in user
+  getMyReportedBugs: () => api.get('/bugs/my-reports'),
   
   // Create new bug
   createBug: (bugData) => api.post('/bugs', bugData),
@@ -87,7 +92,7 @@ export const bugAPI = {
   updateBugStatus: (id, status) => api.patch(`/bugs/${id}/status?status=${status}`),
   
   // Assign bug to user
-  assignBug: (id, assignedTo) => api.patch(`/bugs/${id}/assign`, { assignedTo }),
+  assignBug: (id, developerId) => api.patch(`/bugs/${id}/assign/${developerId}`),
   
   // Delete bug
   deleteBug: (id) => api.delete(`/bugs/${id}`),

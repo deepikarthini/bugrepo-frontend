@@ -17,13 +17,11 @@ function Login() {
     setLoading(true);
 
     try {
-      // Clear any old tokens first
-      localStorage.clear();
       await login(email, password);
-      navigate('/');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       if (!err.response) {
-        setError('Cannot reach backend API. Please make sure Spring Boot is running on port 8080.');
+          setError('Cannot reach backend API. Please make sure Spring Boot is running on port 8081.');
       } else {
         setError(err.response?.data?.message || 'Invalid email or password');
       }

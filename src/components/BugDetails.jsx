@@ -52,7 +52,7 @@ function BugDetails({ currentUser }) {
 
   const handleAssign = async () => {
     try {
-      assignBug(id, selectedUser);
+      await assignBug(id, selectedUser);
       alert('Bug assigned successfully!');
     } catch (error) {
       console.error('Error assigning bug:', error);

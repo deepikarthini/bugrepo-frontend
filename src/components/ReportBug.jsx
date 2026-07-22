@@ -101,7 +101,7 @@ function ReportBug({ currentUser }) {
     };
 
     try {
-      const newBug = createBug(bugData);
+      const newBug = await createBug(bugData);
       alert('Bug reported successfully!');
       navigate(`/bug/${newBug.id}`);
     } catch (error) {

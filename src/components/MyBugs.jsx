@@ -6,10 +6,12 @@ import './MyBugs.css';
 
 function MyBugs({ currentUser }) {
   const { getMyAssignedBugs, updateBugStatus, refreshBugs } = useBugs();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [bugs, setBugs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const canUpdateStatus = user?.role === 'DEVELOPER' || user?.role === 'ADMIN';
+  const pageTitle = user?.role === 'DEVELOPER' ? 'MY ASSIGNED BUGS' : 'MY REPORTED BUGS';
 
   useEffect(() => {
     loadMyBugs(true);
@@ -104,7 +106,7 @@ Last Updated: ${new Date(bug.updatedAt).toLocaleString()}
   return (
     <div className="my-bugs">
       <div className="page-header">
-        <h1 className="page-title">MY ASSIGNED BUGS</h1>
+        <h1 className="page-title">{pageTitle}</h1>
         <div className="header-actions">
           <button 
             className="btn btn-update" 
@@ -126,7 +128,11 @@ Last Updated: ${new Date(bug.updatedAt).toLocaleString()}
       ) : (
         <div className="card">
           {bugs.length === 0 ? (
-            <p className="no-bugs">No bugs assigned to you yet.</p>
+            <p className="no-bugs">
+              {user?.role === 'DEVELOPER'
+                ? 'No bugs assigned to you yet.'
+                : 'You have not reported any bugs yet.'}
+            </p>
           ) : (
             <div className="table-container">
               <table className="bugs-table">
@@ -149,15 +155,21 @@ Last Updated: ${new Date(bug.updatedAt).toLocaleString()}
                       </Link>
                     </td>
                     <td>
-                      <select
-                        className={`status-select ${getStatusClass(bug.status)}`}
-                        value={bug.status}
-                        onChange={(e) => handleStatusUpdate(bug.id, e.target.value)}
-                      >
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Closed">Closed</option>
-                      </select>
+                      {canUpdateStatus ? (
+                        <select
+                          className={`status-select ${getStatusClass(bug.status)}`}
+                          value={bug.status}
+                          onChange={(e) => handleStatusUpdate(bug.id, e.target.value)}
+                        >
+                          <option value="Open">Open</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Closed">Closed</option>
+                        </select>
+                      ) : (
+                        <span className={`status-badge ${getStatusClass(bug.status)}`}>
+                          {bug.status}
+                        </span>
+                      )}
                     </td>
                     <td>
                       <span className={`priority-badge ${getPriorityClass(bug.priority)}`}>
